@@ -1,6 +1,7 @@
 package com.example.dado
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -9,8 +10,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dado.ui.theme.DadoTheme
@@ -38,45 +43,70 @@ class MainActivity : ComponentActivity() {
                 ) {
                     dado()
                 }
-                }
             }
         }
     }
 
-
-@Composable
-fun DiceRoller(modifier: Modifier = Modifier
-    .fillMaxSize()
-    .wrapContentSize(Alignment.Center)){
-
-    var result by remember { mutableStateOf(1) }
-    val imageResource = when(result){
-        1 -> R.drawable.dice_1
-        2 -> R.drawable.dice_2
-        3 -> R.drawable.dice_3
-        4 -> R.drawable.dice_4
-        5 -> R.drawable.dice_5
-        else -> R.drawable.dice_6
+    @Composable
+    fun SimpleOutlinedTextFieldSample() {
+        var text by remember { mutableStateOf("") }
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it },
+            label = { Text("Número") },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number
+            )
+        )
     }
 
-    Column(
-        modifier = Modifier,
-        horizontalAlignment = Alignment.CenterHorizontally){
-        Image(
-            painter = painterResource(id = imageResource),
-            contentDescription = "1")
+    @Composable
+    fun DiceRoller(modifier: Modifier = Modifier
+        .fillMaxSize()
+        .wrapContentSize(Alignment.Center)) {
 
-        Spacer(modifier = Modifier.height(16.dp))
+        var result by remember { mutableStateOf(1) }
+        val imageResource = when (result) {
+            1 -> R.drawable.dice_1
+            2 -> R.drawable.dice_2
+            3 -> R.drawable.dice_3
+            4 -> R.drawable.dice_4
+            5 -> R.drawable.dice_5
+            else -> R.drawable.dice_6
+        }
 
-        Button(onClick = {result = (1..6).random() }){
-            Text(stringResource(R.string.rodar))
+        var isWinner by remember { mutableStateOf(false) } // Track win state
+
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = imageResource),
+                contentDescription = "Imagem do resultado do dado"
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SimpleOutlinedTextFieldSample()
+
+            if (isWinner) {
+                // Exibir Toast com a mensagem de ganhador
+                Toast.makeText(this@MainActivity, "Você ganhou!", Toast.LENGTH_SHORT).show()
+            }
+
+            Button(onClick = {
+                result = (1..6).random()
+                isWinner = text.toIntOrNull()?.equals(result) ?: false
+            }) {
+                Text(stringResource(R.string.rodar))
+            }
         }
     }
-}
 
-
-@Preview(showBackground = true)
-@Composable
-fun dado(){
-    DiceRoller()
+    @Preview(showBackground = true)
+    @Composable
+    fun dado() {
+        DiceRoller()
+    }
 }
